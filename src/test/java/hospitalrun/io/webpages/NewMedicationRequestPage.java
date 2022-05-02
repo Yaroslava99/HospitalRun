@@ -7,15 +7,22 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 
 public class NewMedicationRequestPage {
     protected WebDriver driver;
+    WebDriverWait w;
+    String testPatientxPath = "//div[@class=\"tt-dataset tt-dataset-0\"]//div[32]";
+    String patientNameDropDown = "div.tt-dataset-0 > div";
+    String visitDropDown = "//*[contains(@id, 'visit-ember')]//option";
+    String medicationDropDown = "div.tt-dataset-1 > div";
+    String dateFormat = "M/d/yyyy";
+    String pageHeader = "New Medication Request";
+    String savedPopupTitle = "Medication Request Saved";
 
     @FindBy(tagName = "h1")
     private WebElement header;
@@ -44,36 +51,63 @@ public class NewMedicationRequestPage {
     @FindBy(css = ".btn.btn-primary.on-white")
     private WebElement addButton;
 
+    @FindBy(className = "modal-title")
+    private WebElement modalTitle;
+
+    @FindBy(xpath = "//div[@class='modal-content']//*[contains(@class, 'btn')]")
+    private WebElement okButton;
+
+    @FindBy(css = "button.close")
+    private WebElement xButton;
+
     public NewMedicationRequestPage(WebDriver driver){
         this.driver=driver;
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(60));
         PageFactory.initElements(driver, this);
+        w = new WebDriverWait(driver,Duration.ofSeconds(10));
+        w.until(ExpectedConditions.visibilityOf(header));
     }
 
-    public void fillTheForm(String patientName, String medication, String prescription) {
-        SimpleDateFormat formatter= new SimpleDateFormat("M/d/yyyy");
-        Instant before = Instant.now().minus(Duration.ofDays(1));
-        Date dateBefore = Date.from(before);
+    protected void fillPatientName(String patientName){
         this.patientName.click();
-        this.patientName.sendKeys("Test Patient");
-        waitDropDown(this.patientName, "div.tt-dataset-0 > div");
-        WebElement optionToSelect = driver.findElement(By.xpath("//*[@id=\"ember2570\"]/span/div/div/div[32]"));
+        this.patientName.sendKeys(patientName);
+        waitDropDown(this.patientName, patientNameDropDown);
+        WebElement optionToSelect = driver.findElement(By.xpath(testPatientxPath));
         optionToSelect.click();
-        WebDriverWait w = new WebDriverWait(driver,Duration.ofSeconds(10));
-        w.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#visit-ember2579 option"), 1));
+    }
+
+    public WebElement getOkBtn(){
+        return okButton;
+    }
+
+    protected void fillVisit(){
         this.visit.click();
         this.visit.sendKeys(Keys.ARROW_DOWN);
         this.visit.sendKeys(Keys.ENTER);
+    }
+
+    protected void fillMedication(String medication){
         this.medication.click();
         this.medication.sendKeys(medication);
-        waitDropDown(this.medication, "div.tt-dataset-1 > div");
+        waitDropDown(this.medication, medicationDropDown);
         this.medication.sendKeys(Keys.TAB);
-        this.prescription.sendKeys(prescription);
+    }
+
+    protected void fillPrescriptionDate(){
+        LocalDate dateBefore = LocalDate.now().minusDays(1);
         this.prescriptionDate.clear();
-        this.prescriptionDate.sendKeys(formatter.format(dateBefore));
-        this.medication.sendKeys(Keys.ENTER);
-        this.quantity.sendKeys(String.valueOf(generateRandInt(1, 5)));
-        this.refills.sendKeys(String.valueOf(generateRandInt(5, 10)));
+        this.prescriptionDate.sendKeys(dateBefore.format(DateTimeFormatter.ofPattern(dateFormat)));
+        this.prescriptionDate.sendKeys(Keys.TAB);
+    }
+
+    public void fillTheForm(String patientName, String medication, String prescription) {
+        fillPatientName(patientName);
+        w.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.xpath(visitDropDown), 1));
+        fillVisit();
+        fillMedication(medication);
+        this.prescription.sendKeys(prescription);
+        fillPrescriptionDate();
+        quantity.sendKeys(String.valueOf(generateRandInt(1, 5)));
+        refills.sendKeys(String.valueOf(generateRandInt(5, 10)));
         addButton.click();
     }
 
@@ -83,16 +117,13 @@ public class NewMedicationRequestPage {
     }
 
     public boolean isPageOpened(){
-        return header.getText().equals("New Medication Request");
+        return header.getText().equals(pageHeader);
     }
 
-    public void CheckMedicationRequestSavedPopup(){
-        WebElement modalTitle = driver.findElement(By.className("modal-title"));
-        Assertions.assertEquals("Medication Request Saved", modalTitle.getText());
-        WebElement okButton = driver.findElement(By.cssSelector(" #ember3305 > div > div > div > div.modal-footer > button"));
-        Assertions.assertEquals("OK", okButton.getText());
-        Assertions.assertEquals("Medication Request Saved", modalTitle.getText());
-        WebElement xButton = driver.findElement(By.cssSelector("button.close"));
+    public void checkMedicationRequestSavedPopup(){
+        w.until(ExpectedConditions.visibilityOf(modalTitle));
+        Assertions.assertEquals(savedPopupTitle, modalTitle.getText());
+        Assertions.assertEquals("Ok", okButton.getText());
         Assertions.assertTrue(xButton.isDisplayed());
     }
 

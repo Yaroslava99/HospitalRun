@@ -20,7 +20,6 @@ public class MenuPageFragment {
 
     @FindBy(css = "#ember765 .category-sub-items a")
     private List<WebElement> options;
-    //= driver.findElements(By.cssSelector("#ember765 .category-sub-items a"));
 
     public MenuPageFragment(WebDriver driver) {
         this.driver=driver;
@@ -40,7 +39,7 @@ public class MenuPageFragment {
         this.newRequestTab.click();
     }
 
-    public boolean CheckMedicationSection(){
+    public boolean checkMedicationSection(){
         if(options.size()!=4)
             return false;
         for (WebElement option : options) {

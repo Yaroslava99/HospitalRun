@@ -4,11 +4,15 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
 public class PatientsPage {
     protected WebDriver driver;
+    WebDriverWait w;
+    String pageHeader = "Patient Listing";
 
     @FindBy(tagName = "h1")
     private WebElement header;
@@ -21,16 +25,17 @@ public class PatientsPage {
 
     public PatientsPage(WebDriver driver){
         this.driver=driver;
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(60));
         PageFactory.initElements(driver, this);
+        w = new WebDriverWait(driver,Duration.ofSeconds(60));
     }
 
-    public void Logout() {
+    public void logout() {
         this.cogwheel.click();
         this.logout.click();
     }
 
     public boolean isPageOpened(){
-        return header.getText().equals("Patient Listing");
+        w.until(ExpectedConditions.visibilityOf(header));
+        return header.getText().equals(pageHeader);
     }
 }
