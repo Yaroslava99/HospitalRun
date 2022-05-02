@@ -23,7 +23,7 @@ abstract public class AbstractTest {
 
     @AfterEach
     public void close(){
-        //driver.close();
+        driver.close();
     }
 
     protected String getBrowserParameter() {

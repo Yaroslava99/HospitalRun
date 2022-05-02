@@ -1,8 +1,0 @@
--------------------------------------------------------------------------------
-Test set: hospitalrun.io.tests.TestLogin
--------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 111.834 s - in hospitalrun.io.tests.TestLogin
-LogOut{String, String}[1]  Time elapsed: 56.519 s
-LogInWithCorrectCredentials{String, String}[1]  Time elapsed: 40.759 s
-LogInWithInvalidCredentials{String, String}[1]  Time elapsed: 6.545 s
-LogInWithInvalidCredentials{String, String}[2]  Time elapsed: 7.633 s
